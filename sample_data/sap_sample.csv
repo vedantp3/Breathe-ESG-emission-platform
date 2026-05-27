@@ -1,0 +1,21 @@
+BUKRS;WERKS;BLDAT;MENGE;MEINS;MATNR;SGTXT
+1000;1000;20240103;450.000;L;DIESEL-001;Diesel Betankung LKW Fuhrpark Hamburg
+1000;1000;20240108;320.500;L;DIESEL-001;Betankung Gabelstapler Halle 3
+1000;2000;15.01.2024;1200.000;L;DIESEL-001;Monatliche Diesellieferung Frankfurt Werk
+1000;2000;22.01.2024;85.000;KG;NATGAS-004;Erdgas Heizung Bürogebäude
+1000;3000;20240201;2500.000;M3;NATGAS-004;Gasverbrauch Produktionshalle München
+1000;1000;05.02.2024;680.000;L;PETROL-002;Benzin Dienstfahrzeuge Hamburg HQ
+1000;2100;20240210;45.000;L;DIESEL-001;Notstromaggregat Testlauf Labor Frankfurt
+1000;3000;18.02.2024;110.000;KG;NATGAS-004;Prozessgas Fertigungsanlage 2
+1000;4000;20240301;900.000;L;DIESEL-001;Diesel Baustellenfahrzeuge Berlin
+1000;1100;20240305;3200.000;L;DIESEL-001;Quartalslieferung Diesel Warenlager Hamburg
+1000;5000;12.03.2024;560.000;L;PETROL-002;Benzin Außendienst Stuttgart
+1000;2000;20240318;75.000;KG;COAL-006;Kohle Reserveheizung Frankfurt Werk
+1000;3100;20240402;1800.000;L;DIESEL-001;Diesel Logistikflotte München Büro
+1000;1000;10.04.2024;425.000;L;LPG-003;LPG Gabelstapler Modernisierung Hamburg
+1000;2000;20240415;950.000;M3;NATGAS-004;Gasverbrauch April Frankfurt Werk
+1000;3000;25.04.2024;310.000;L;DIESEL-001;Diesellieferung Außenlager München
+1000;4000;20240501;130.000;KG;HFO-005;Schweröl Notfallgenerator Berlin
+1000;1100;08.05.2024;2100.000;L;DIESEL-001;Diesel Warenlager Hamburg Mai
+1000;5000;20240512;440.000;L;PETROL-002;Benzin Außendienstfahrzeuge Stuttgart
+1000;2100;20240520;67.500;L;BIOFUEL-007;Biodiesel Pilotprojekt Lab Frankfurt

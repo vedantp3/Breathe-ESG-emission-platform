@@ -1,0 +1,10 @@
+[build]
+  builder = "NIXPACKS"
+  buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+  startCommand = "gunicorn breathe.wsgi --workers 2 --bind 0.0.0.0:$PORT"
+  releaseCommand = "python manage.py migrate && python manage.py seed_analyst"
+  healthcheckPath = "/api/auth/token/"
+  healthcheckTimeout = 100
+  restartPolicyType = "ON_FAILURE"

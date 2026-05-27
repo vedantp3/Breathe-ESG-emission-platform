@@ -1,0 +1,15 @@
+meter_id,site_name,billing_period_start,billing_period_end,consumption_kwh,consumption_unit,tariff_code,supplier_name
+MTR-001,Hamburg HQ,2024-01-15,2024-02-18,48250.00,kWh,TRF-HH-01,E.ON Energie Deutschland
+MTR-001,Hamburg HQ,2024-02-18,2024-03-20,51430.00,kWh,TRF-HH-01,E.ON Energie Deutschland
+MTR-001,Hamburg HQ,2024-03-20,2024-04-22,44180.00,kWh,TRF-HH-01,E.ON Energie Deutschland
+MTR-002,Frankfurt Plant,2024-01-08,2024-02-07,312.50,MWh,TRF-FR-INDUSTRIAL,RWE AG
+MTR-002,Frankfurt Plant,2024-02-07,2024-03-11,298.75,MWh,TRF-FR-INDUSTRIAL,RWE AG
+MTR-002,Frankfurt Plant,2024-03-11,2024-04-09,325.00,MWh,TRF-FR-INDUSTRIAL,RWE AG
+MTR-002,Frankfurt Plant,2024-04-09,2024-05-08,289.25,MWh,TRF-FR-INDUSTRIAL,RWE AG
+MTR-003,Munich Distribution,2024-01-22,2024-02-24,29640.00,kWh,TRF-MUC-02,Stadtwerke München
+MTR-003,Munich Distribution,2024-02-24,2024-03-26,27890.00,kWh,TRF-MUC-02,Stadtwerke München
+MTR-003,Munich Distribution,2024-03-26,2024-04-28,31250.00,kWh,TRF-MUC-02,Stadtwerke München
+MTR-003,Munich Distribution,2024-04-28,2024-05-30,33100.00,kWh,TRF-MUC-02,Stadtwerke München
+MTR-004,Berlin Site,2024-01-10,2024-02-12,18450.00,kWh,TRF-BER-03,Vattenfall Wärme Berlin
+MTR-004,Berlin Site,2024-02-12,2024-03-14,17830.00,kWh,TRF-BER-03,Vattenfall Wärme Berlin
+MTR-004,Berlin Site,2024-03-14,2024-04-16,15970.00,kWh,TRF-BER-03,Vattenfall Wärme Berlin
