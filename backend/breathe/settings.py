@@ -9,7 +9,7 @@ Key differences from a default Django project:
 - Media files for CSV uploads stored locally (use S3 in production)
 - WhiteNoise for static file serving in production
 """
-
+import dj_database_url
 import os
 from pathlib import Path
 from datetime import timedelta
