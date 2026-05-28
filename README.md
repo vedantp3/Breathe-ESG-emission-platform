@@ -1,50 +1,142 @@
-# Breathe ESG — Carbon Emissions Data Platform
+# Breathe ESG Carbon Emissions Platform
 
-A production-quality prototype for ingesting, normalising, and reviewing corporate GHG emissions across SAP Fuel (Scope 1), Utility Electricity (Scope 2), and Corporate Travel (Scope 3) sources.
+A full-stack prototype for ingesting, normalizing, and reviewing corporate greenhouse gas emissions data across three operational sources:
 
----
+- SAP fuel and procurement data for Scope 1
+- Utility electricity data for Scope 2
+- Corporate travel data for Scope 3
 
-## Prerequisites
+The goal of the project is not just file upload. It is to turn messy operational exports into audit-friendly emission records that analysts can review, correct, approve, and lock before reporting.
+
+## Live Demo
+
+- Frontend: [https://breathe-esg-emission-platform.vercel.app/](https://breathe-esg-emission-platform.vercel.app/)
+- Backend: [https://breathe-esg-emission-platform.onrender.com/api/](https://breathe-esg-emission-platform.onrender.com/api/)
+- Demo login:
+  - Username: `analyst`
+  - Password: `analyst123`
+
+Note: the Render free backend may take a short time to wake up after inactivity.
+
+## What This Project Solves
+
+Sustainability teams rarely receive clean, consistent emissions data. Different departments export data from different systems, each with different:
+
+- column names
+- units
+- date formats
+- quality issues
+- business rules
+
+This platform solves that by:
+
+1. accepting source-specific CSV uploads
+2. parsing each source with dedicated ingestion logic
+3. converting records into one normalized emissions model
+4. logging row-level errors without failing the whole file
+5. giving analysts a review workflow before final audit lock
+
+## Key Features
+
+- JWT-based analyst login
+- Multi-tenant data model using `Client` and `UserProfile`
+- Separate ingestion pipelines for SAP, utility, and travel
+- Row-level error logging through `IngestionError`
+- Unified `EmissionRow` review table across all sources
+- Edit tracking that preserves original values on first correction
+- Status workflow: `PENDING -> FLAGGED / NEEDS_DISTANCE / APPROVED -> LOCKED`
+- Upload history with batch-level error visibility
+- Summary dashboard for scope totals and review counts
+
+## Tech Stack
+
+### Backend
+
+- Django
+- Django REST Framework
+- Simple JWT
+- PostgreSQL
+- Pandas for CSV parsing
+- Gunicorn for deployment
+
+### Frontend
+
+- React
+- Vite
+- React Router
+- Axios
+
+## Architecture Overview
+
+### Backend flow
+
+1. Analyst uploads a CSV file.
+2. Backend creates an `UploadBatch`.
+3. A source-specific parser reads and validates the file.
+4. Each valid row becomes an `EmissionRow`.
+5. Each invalid row becomes an `IngestionError`.
+6. Analysts review rows in the dashboard and decide whether to approve, flag, edit, or lock them.
+
+### Core models
+
+- `Client`: tenant/company boundary
+- `UserProfile`: connects a Django user to a client and role
+- `UploadBatch`: one uploaded file and its metadata
+- `EmissionRow`: one normalized emission event
+- `IngestionError`: one non-fatal parsing or validation issue
+
+For the full data model rationale, see [MODEL.md](/D:/Placement/Companies/breathe/MODEL.md).
+
+## Supported Data Sources
+
+### 1. SAP Fuel and Procurement
+
+- Scope: 1
+- Format: semicolon-delimited CSV
+- Example columns: `BUKRS`, `WERKS`, `BLDAT`, `MENGE`, `MEINS`, `MATNR`, `SGTXT`
+- Handles multiple SAP date formats
+- Uses material-based emission factor lookup
+
+### 2. Utility Electricity
+
+- Scope: 2
+- Format: comma-delimited CSV
+- Example columns: `meter_id`, `site_name`, `billing_period_start`, `billing_period_end`, `consumption_kwh`, `consumption_unit`
+- Normalizes `MWh` and `GWh` to `kWh`
+- Uses a client-specific grid emission factor
+
+### 3. Corporate Travel
+
+- Scope: 3
+- Format: comma-delimited CSV
+- Example columns: `trip_id`, `traveler_id`, `travel_date`, `origin`, `destination`, `transport_mode`, `distance_km`
+- Supports `FLIGHT`, `TRAIN`, `CAR`, and `HOTEL`
+- Flags unknown flight routes as `NEEDS_DISTANCE` instead of silently guessing
+
+## Local Development Setup
+
+### Prerequisites
 
 - Python 3.11+
 - Node.js 18+
-- PostgreSQL 14+ running locally (or Docker)
+- PostgreSQL 14+
 
----
-
-## 1. Backend Setup
+### Backend
 
 ```powershell
-# Create and activate virtual environment
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Configure environment (edit as needed)
 copy .env.example .env
-
-# Create the PostgreSQL database
-# (psql must be on PATH, or use pgAdmin)
-psql -U postgres -c "CREATE DATABASE breathe_esg;"
-
-# Run migrations
 python manage.py migrate
-
-# Seed the analyst user (username: analyst / password: analyst123)
 python manage.py seed_analyst
-
-# Start the Django dev server
 python manage.py runserver
 ```
 
-The API is now available at **http://localhost:8000/api/**
+Backend runs at `http://localhost:8000/api/`
 
----
-
-## 2. Frontend Setup
+### Frontend
 
 ```powershell
 cd frontend
@@ -52,98 +144,133 @@ npm install
 npm run dev
 ```
 
-The React app is now at **http://localhost:5173**
+Frontend runs at `http://localhost:5173`
 
----
+## Required Environment Variables
 
-## 3. Login
+### Backend
 
-Open http://localhost:5173/login and sign in with:
-- **Username:** `analyst`
-- **Password:** `analyst123`
+- `DJANGO_SECRET_KEY`
+- `DJANGO_DEBUG`
+- `ALLOWED_HOSTS`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `FRONTEND_URL`
 
----
+### Frontend
 
-## 4. Upload Sample Data
+- `VITE_API_BASE_URL`
 
-Go to **Upload Data** (/upload) and upload the files from `sample_data/`:
+## Sample Data and Expected Results
+
+Upload the files in [sample_data](/D:/Placement/Companies/breathe/sample_data):
 
 | File | Source | Expected Result |
-|------|--------|----------------|
-| `sap_sample.csv` | SAP Fuel | 19 rows, 1 UNKNOWN_MATERIAL warning |
-| `utility_sample.csv` | Utility | 14 rows, 0 errors |
-| `travel_sample.csv` | Corporate Travel | 25 rows, 2 NEEDS_DISTANCE flagged |
+|---|---|---|
+| `sap_sample.csv` | SAP Fuel | 19 rows created, 1 `UNKNOWN_MATERIAL` warning |
+| `utility_sample.csv` | Utility Electricity | 14 rows created, 0 errors |
+| `travel_sample.csv` | Corporate Travel | 25 rows created, 2 rows flagged as `NEEDS_DISTANCE` |
 
----
+## Main API Endpoints
 
-## 5. API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/token/` | Get JWT access + refresh tokens |
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/auth/token/` | Login and get JWT tokens |
 | POST | `/api/auth/token/refresh/` | Refresh access token |
 | POST | `/api/ingest/sap/` | Upload SAP CSV |
 | POST | `/api/ingest/utility/` | Upload utility CSV |
 | POST | `/api/ingest/travel/` | Upload travel CSV |
-| GET | `/api/rows/` | List rows (filter: source, status, scope, date_from, date_to, search) |
-| PATCH | `/api/rows/{id}/` | Edit raw_value / raw_unit / kgco2e / analyst_notes |
+| GET | `/api/rows/` | List normalized rows with filters |
+| PATCH | `/api/rows/{id}/` | Edit row values and notes |
 | PATCH | `/api/rows/{id}/approve/` | Approve a row |
-| PATCH | `/api/rows/{id}/flag/` | Flag a row with reason |
-| POST | `/api/rows/lock/` | Bulk lock approved rows (body: `{"row_ids": [...]}`) |
+| PATCH | `/api/rows/{id}/flag/` | Flag a row |
+| POST | `/api/rows/lock/` | Bulk lock approved rows |
 | GET | `/api/uploads/` | List upload batches |
-| GET | `/api/uploads/{id}/` | Batch detail with ingestion errors |
-| GET | `/api/summary/` | Dashboard summary stats |
+| GET | `/api/uploads/{id}/` | View batch details and errors |
+| GET | `/api/summary/` | Dashboard summary metrics |
 
-All endpoints require `Authorization: Bearer <access_token>`.
+All protected endpoints require:
 
----
-
-## 6. Project Structure
-
+```text
+Authorization: Bearer <access_token>
 ```
+
+## Frontend Pages
+
+- `/login`: analyst authentication
+- `/upload`: upload source files
+- `/dashboard`: review, approve, flag, edit, and lock rows
+- `/uploads`: upload history and ingestion errors
+
+## Project Structure
+
+```text
 breathe/
 ├── backend/
-│   ├── breathe/          # Django project (settings, urls, wsgi)
-│   ├── core/             # Main app
-│   │   ├── models.py     # ERD + all models
+│   ├── breathe/                  # Django project config
+│   ├── core/
+│   │   ├── ingestion/            # Source-specific parsers
+│   │   ├── management/commands/  # seed_analyst command
+│   │   ├── models.py
 │   │   ├── serializers.py
-│   │   ├── views.py
 │   │   ├── urls.py
-│   │   ├── ingestion/
-│   │   │   ├── sap.py    # SAP Fuel parser (semicolon-delimited)
-│   │   │   ├── utility.py # Electricity parser (comma-delimited)
-│   │   │   └── travel.py  # Corporate travel parser (Concur/Navan)
-│   │   └── management/commands/seed_analyst.py
+│   │   └── views.py
 │   ├── requirements.txt
-│   └── .env.example
+│   ├── Procfile
+│   ├── render.toml
+│   └── railway.json
 ├── frontend/
-│   └── src/
-│       ├── App.jsx
-│       ├── api/axios.js
-│       ├── components/   # Navbar, StatusBadge, SummaryBar
-│       └── pages/        # LoginPage, UploadPage, Dashboard, UploadHistory
-└── sample_data/          # 3 realistic CSV files for testing
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   └── pages/
+│   ├── package.json
+│   └── vercel.json
+├── sample_data/
+├── MODEL.md
+├── DECISIONS.md
+├── SOURCES.md
+└── TRADEOFFS.md
 ```
 
----
+## Important Design Decisions
 
-## Key Design Decisions
+- Every query is scoped by client to avoid cross-tenant leakage.
+- Ingestion is resilient: one bad row does not fail the whole upload.
+- Raw and normalized values are both stored for auditability.
+- The upload batch is stored before parsing begins, so failed imports are still traceable.
+- Travel rows with unknown route distance are marked `NEEDS_DISTANCE` instead of being dropped or guessed.
+- Edit tracking preserves the original values on the first analyst correction.
 
-- **Client scoping**: every DB query is filtered by `request.user.profile.client` — no cross-tenant data leakage
-- **Non-crashing ingestion**: every row error creates an `IngestionError` record; imports never crash mid-file
-- **Edit tracking**: `original_raw_value/unit/kgco2e` preserved on first edit for single-level audit trail
-- **Status lifecycle**: `PENDING → FLAGGED/APPROVED/NEEDS_DISTANCE → LOCKED` (locked rows are immutable)
-- **Per-client grid factor**: `Client.grid_emission_factor_kgco2e_per_kwh` makes Scope 2 factor configurable without code changes
+## Known Tradeoffs
 
-## TODO for Production
+- Emission factors are hardcoded for the prototype.
+- Utility ingestion supports CSV exports, not PDF bills.
+- Edit history is single-level, not full version history.
+- Flight distance lookup uses a small in-code route map instead of a live aviation dataset or API.
 
-- [ ] Replace hardcoded emission factors with Climatiq / BEIS API
-- [ ] Replace IATA distance dict with ICAO or OAG great-circle API
-- [ ] Add per-region, per-year grid intensity (DEFRA, IEA, EPA eGRID)
-- [ ] Use S3/GCS for file storage instead of local media/
-- [ ] Add refresh-token rotation and revocation (token blacklist)
-- [ ] Add django-simple-history for full audit log (vs single-level edit tracking)
-- [ ] Add role-based permissions (Analyst vs Admin)
-- [ ] Add celery task queue for async ingestion of large files (>10k rows)
-- [ ] Add email notifications on approval/lock
-- [ ] Multi-year reporting period support
+More detail:
+
+- [DECISIONS.md](/D:/Placement/Companies/breathe/DECISIONS.md)
+- [TRADEOFFS.md](/D:/Placement/Companies/breathe/TRADEOFFS.md)
+- [SOURCES.md](/D:/Placement/Companies/breathe/SOURCES.md)
+
+## Production Improvements
+
+- Replace hardcoded emission factors with versioned external factors
+- Add year- and region-specific electricity grid factors
+- Replace static flight route lookup with a real distance source
+- Add full audit history such as `django-simple-history`
+- Move file storage to S3 or GCS
+- Add role-based permissions and stronger auth lifecycle management
+- Add async ingestion for large files
+
+## Interview Summary
+
+If you need to explain the project quickly:
+
+> This is a Django and React ESG data platform that ingests emissions data from SAP, utility, and travel exports, normalizes them into a unified review model, logs row-level issues without crashing uploads, and gives analysts an approval workflow before audit lock.
+
